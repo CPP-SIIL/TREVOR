@@ -3,7 +3,8 @@ class Counter:
     def __init__(self, A, B):
         self.line_start = A
         self.line_end = B
-        self.people = 0
+        self.in_count = 0
+        self.out_count = 0
         self.last_side_by_id = {}
         # self.last_count_frame_by_id
         # to work around jitter, treat points very close to line as neutral
@@ -44,13 +45,14 @@ class Counter:
             prev_side = self.last_side_by_id[track_id]
 
             if prev_side == -1 and current_side == 1:
-                self.people = self.people + 1
+                self.in_count = self.in_count + 1
+
+            elif prev_side == 1 and current_side == -1:
+                self.out_count = self.out_count + 1
 
 
             self.last_side_by_id[track_id] = current_side
                 
-
-
     def side_of_line(self, P):
         # A, B, and P are points with x and y coordinates
         # function returns values to represent LEFT, RIGHT, or NEAR

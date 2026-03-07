@@ -147,14 +147,52 @@ def main():
                 cv2.circle(frame, (center_x, center_y), 5, (255, 0, 0), -1)
 
         # ADDED
+
+        x_left = 10
+        x_right = width - 10
+        y0 = 30
+        dy = 35
+        
         cv2.putText(frame,
-            f"Count: {counter.people}",
-            (50, 50),
+            f"Ingress: {counter.in_count}",
+            (x_left, y0 + 0*dy),
             cv2.FONT_HERSHEY_SIMPLEX,
             1,
             (0, 255, 0),
             2)
 
+        cv2.putText(frame,
+            f"---------->",
+            (x_left, y0 + 1*dy),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            1,
+            (0, 255, 0),
+            2)        
+        
+        (text_width, text_height), _ = cv2.getTextSize(
+            f"Egress: {counter.out_count}",
+            cv2.FONT_HERSHEY_SIMPLEX,
+            1,
+            2
+        )
+
+        x_right = width - text_width - 10
+
+        cv2.putText(frame, f"Egress: {counter.out_count}", (x_right, y0),
+            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+
+        (text_width_arrow, _), _ = cv2.getTextSize(
+            "<----------",
+            cv2.FONT_HERSHEY_SIMPLEX,
+            1,
+            2
+        )
+
+        x_right_arrow = width - text_width_arrow - 10
+
+        cv2.putText(frame, "<----------", (x_right_arrow, y0 + dy),
+            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        
         cv2.line(frame, A, B, (0, 0, 255), 2)
 
         cv2.imshow('Frame', frame.astype('uint8'))
