@@ -1,3 +1,6 @@
+# TREVOR
+TRansformer Enhanced Vision Object Recognition
+
 ByteTrack implementation for person tracking using PyTorch
 
 ### Installation
@@ -27,3 +30,15 @@ pip install scipy
 
 * https://github.com/ultralytics/ultralytics
 * https://github.com/jahongir7174/YOLOv8-pt
+
+
+# Run Project:
+Start database
+`uvicorn main:app --host 127.0.0.1 --port 8000`
+
+Start camera demo
+`python main5.py`
+
+Start Dashboard
+`cd demo`
+`python main.py`
