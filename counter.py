@@ -9,6 +9,7 @@ class Counter:
         self.in_count = 0
         self.out_count = 0
         self.last_side_by_id = {}
+        self.counted_ids = {}
         # to work around jitter, treat points very close to line as neutral
         self.eps = 5
 
@@ -56,13 +57,16 @@ class Counter:
 
             prev_side = self.last_side_by_id[track_id]
 
-            if prev_side == -1 and current_side == 1:
-                self.in_count = self.in_count + 1
-                self._ping("/ingress")
+            if track_id not in self.counted_ids:
+                if prev_side == -1 and current_side == 1:
+                    self.in_count += 1
+                    self.counted_ids[track_id] = "ingress"
+                    self._ping("/ingress")
 
-            elif prev_side == 1 and current_side == -1:
-                self.out_count = self.out_count + 1
-                self._ping("/egress")
+                elif prev_side == 1 and current_side == -1:
+                    self.out_count += 1
+                    self.counted_ids[track_id] = "egress"
+                    self._ping("/egress")
 
             self.last_side_by_id[track_id] = current_side
 
