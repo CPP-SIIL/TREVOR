@@ -8,7 +8,8 @@ WORKDIR /app
 COPY . /app
 
 # Install required Python packages
-RUN pip install --no-cache-dir opencv-python numpy requests
+RUN pip install --no-cache-dir -r requirements.txt
+
 
 # Command to run your main program
 CMD ["python", "main.py"]
