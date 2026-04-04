@@ -365,7 +365,7 @@ def serve_index():
 
 @app.get("/{path:path}")
 def spa_fallback(path: str):
-    if path.startswith("api"):
+    if path.startswith("api") or path.startswith("."):
         raise HTTPException(404)
     candidate = (DIST_DIR / path).resolve()
     try:
