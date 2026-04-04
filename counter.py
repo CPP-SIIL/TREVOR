@@ -6,7 +6,8 @@ INSIDE = "inside"
 TENTATIVE_OUT = "tentative_out"
 
 class Counter:
-    def __init__(self, A, B, confirm_threshold=40):
+    # confirm_threshold originally 40, can also try 120 or other values
+    def __init__(self, A, B, confirm_threshold=500):
         self.line_start = A
         self.line_end = B
         self.in_count = 0
