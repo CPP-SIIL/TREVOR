@@ -1,0 +1,8 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+
+# Dashboard
+data/*.db
+node_modules/
+dist/
