@@ -1,15 +1,33 @@
-# Use official Python image
 FROM python:3.11-slim
 
-# Set working directory inside container
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
 WORKDIR /app
 
-# Copy all project files into container
-COPY . /app
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    gcc \
+    g++ \
+    ffmpeg \
+    libglib2.0-0 \
+    libgomp1 \
+    libjpeg62-turbo \
+    libpng16-16 \
+    libsm6 \
+    libxext6 \
+    libxrender1 \
+    libxcb1 \
+    libx11-6 \
+    libxau6 \
+    libxdmcp6 \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install required Python packages
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+COPY . .
 
-# Command to run your main program
-CMD ["python", "main.py"]
+EXPOSE 8000
+
+CMD ["uvicorn", "main6:app", "--host", "0.0.0.0", "--port", "8000"]

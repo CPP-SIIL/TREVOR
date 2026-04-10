@@ -1,0 +1,11 @@
+services:
+  vision:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      CAMERA_SOURCE: "http://host.docker.internal:8080/video"
+    volumes:
+      - ./weights:/app/weights
+      - ./data:/app/data
+    restart: unless-stopped
