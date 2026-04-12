@@ -1,11 +1,25 @@
 services:
-  vision:
-    build: .
+  camera:
+    build:
+      context: .
+      dockerfile: camera/Dockerfile
+    ports:
+      - "8001:8000"
+    environment:
+      CAMERA_SOURCE: 0
+      DASHBOARD_URL: "http://192.168.1.50:8000"
+    devices:
+      - "/dev/video0:/dev/video0"
+    volumes:
+      - ./camera/weights:/app/weights
+    restart: unless-stopped
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: dashboard/Dockerfile
     ports:
       - "8000:8000"
-    environment:
-      CAMERA_SOURCE: "http://host.docker.internal:8080/video"
     volumes:
-      - ./weights:/app/weights
-      - ./data:/app/data
+      - ./dashboard/data:/app/data
     restart: unless-stopped
