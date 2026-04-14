@@ -10,11 +10,28 @@ import { getInitialHourly24h, persistHourly24h } from "./hourlyFormat";
 
 const POLL_MS = 5000;
 
+type DashboardPage = "overview" | "occupancy" | "trends" | "patterns";
+
+const PAGE_TITLES: Record<DashboardPage, string> = {
+  overview: "Overview",
+  occupancy: "Occupancy",
+  trends: "Trends",
+  patterns: "Traffic patterns",
+};
+
+const PAGE_SUBTITLES: Record<DashboardPage, string> = {
+  overview: "Live summary of people flow and pacing",
+  occupancy: "Inside vs typical day and hourly net flow",
+  trends: "Hourly, daily, and weekly movement over time",
+  patterns: "Most active hours and directional flow by hour",
+};
+
 export default function App() {
   const { theme, toggleTheme } = useTheme();
   const [stats, setStats] = useState<Stats | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [hourly24h, setHourly24h] = useState(getInitialHourly24h);
+  const [page, setPage] = useState<DashboardPage>("overview");
 
   useEffect(() => {
     persistHourly24h(hourly24h);
@@ -43,30 +60,92 @@ export default function App() {
       : "Loading…");
 
   return (
-    <div className="page">
-      <header className="header">
-        <div>
-          <span className="header__title">People count</span>
-          <span className="header__subtitle">Ingress & egress</span>
+    <div className="dashboard-shell">
+      <aside className="dashboard-sidebar">
+        <div className="dashboard-sidebar__brand">
+          <div className="dashboard-sidebar__eyebrow">Cal Poly Pomona</div>
+          <h1 className="dashboard-sidebar__title">Maker Space Dashboard</h1>
+          <p className="dashboard-sidebar__subtitle">Daily usage, flow, and activity insights</p>
         </div>
-        <div className="header__actions">
-          <ThemeToggle theme={theme} onToggle={toggleTheme} />
-          <Clock />
-        </div>
-      </header>
 
-      <Metrics stats={stats} />
+        <nav className="dashboard-sidebar__nav" aria-label="Dashboard navigation">
+          <button
+            type="button"
+            className={`dashboard-sidebar__link${
+              page === "overview" ? " dashboard-sidebar__link--active" : ""
+            }`}
+            onClick={() => setPage("overview")}
+          >
+            Overview
+          </button>
 
-      <p className={`status${error ? " status--error" : ""}`} role="status">
-        {statusText}
-      </p>
+          <button
+            type="button"
+            className={`dashboard-sidebar__link${
+              page === "occupancy" ? " dashboard-sidebar__link--active" : ""
+            }`}
+            onClick={() => setPage("occupancy")}
+          >
+            Occupancy
+          </button>
 
-      <DashboardCharts
-        stats={stats}
-        theme={theme}
-        hourly24h={hourly24h}
-        onHourly24hChange={setHourly24h}
-      />
+          <button
+            type="button"
+            className={`dashboard-sidebar__link${
+              page === "trends" ? " dashboard-sidebar__link--active" : ""
+            }`}
+            onClick={() => setPage("trends")}
+          >
+            Trends
+          </button>
+
+          <button
+            type="button"
+            className={`dashboard-sidebar__link${
+              page === "patterns" ? " dashboard-sidebar__link--active" : ""
+            }`}
+            onClick={() => setPage("patterns")}
+          >
+            Traffic patterns
+          </button>
+        </nav>
+      </aside>
+
+      <main className="dashboard-main">
+        <header className="dashboard-topbar">
+          <div>
+            <div className="dashboard-topbar__title">{PAGE_TITLES[page]}</div>
+            <div className="dashboard-topbar__subtitle">{PAGE_SUBTITLES[page]}</div>
+          </div>
+
+          <div className="dashboard-topbar__actions">
+            <ThemeToggle theme={theme} onToggle={toggleTheme} />
+            <Clock />
+          </div>
+        </header>
+
+        {page === "overview" && (
+          <section className="dashboard-section">
+            <Metrics stats={stats} />
+          </section>
+        )}
+
+        <section className="dashboard-section">
+          <p className={`status${error ? " status--error" : ""}`} role="status">
+            {statusText}
+          </p>
+        </section>
+
+        <section className="dashboard-section">
+          <DashboardCharts
+            stats={stats}
+            theme={theme}
+            hourly24h={hourly24h}
+            onHourly24hChange={setHourly24h}
+            page={page}
+          />
+        </section>
+      </main>
     </div>
   );
 }

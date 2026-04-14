@@ -6,3 +6,6 @@ __pycache__/
 data/*.db
 node_modules/
 dist/
+
+Lib/
+Scripts/

@@ -14,6 +14,7 @@ function buildLineOptions(
     color: tick,
     font: { family: "'DM Sans', sans-serif", size: 12 },
   };
+
   return {
     responsive: true,
     maintainAspectRatio: false,
@@ -42,6 +43,7 @@ function buildBarOptions(
     color: tick,
     font: { family: "'DM Sans', sans-serif", size: 12 },
   };
+
   return {
     responsive: true,
     maintainAspectRatio: false,
@@ -73,18 +75,42 @@ function buildBarStackedOptions(
   };
 }
 
+type DashboardPage = "overview" | "occupancy" | "trends" | "patterns";
+
 type Props = {
   stats: Stats | null;
   theme: ThemeMode;
   hourly24h: boolean;
   onHourly24hChange: (value: boolean) => void;
+  page: DashboardPage;
 };
+
+type ChartCardProps = {
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
+  action?: React.ReactNode;
+};
+
+function ChartCard({ title, subtitle, children, action }: ChartCardProps) {
+  return (
+    <article className="card card--chart">
+      <div className="card__heading-row">
+        <h2 className="card__heading card__heading--inline">{title}</h2>
+        {action}
+      </div>
+      {subtitle ? <p className="card__sub">{subtitle}</p> : null}
+      <div className="chart-wrap">{children}</div>
+    </article>
+  );
+}
 
 export function DashboardCharts({
   stats,
   theme,
   hourly24h,
   onHourly24hChange,
+  page,
 }: Props) {
   const palette = useMemo(() => getChartPalette(theme), [theme]);
 
@@ -115,13 +141,15 @@ export function DashboardCharts({
 
   const hourlyLabels = useMemo(() => {
     if (!stats) return [];
-    return stats.hourly.labels.map((l) => formatHourlyAxisLabel(l, hourly24h));
+    return stats.hourly.labels.map((label) =>
+      formatHourlyAxisLabel(label, hourly24h)
+    );
   }, [stats, hourly24h]);
 
   const occupancyAxisLabels = useMemo(() => {
     if (!stats) return [];
-    return stats.occupancy.labels_24h.map((l) =>
-      formatHourlyAxisLabel(l, hourly24h)
+    return stats.occupancy.labels_24h.map((label) =>
+      formatHourlyAxisLabel(label, hourly24h)
     );
   }, [stats, hourly24h]);
 
@@ -221,12 +249,13 @@ export function DashboardCharts({
 
   const occupancyCumulative = useMemo(() => {
     if (!stats) return null;
+
     const occ = stats.occupancy;
-    const n = occ.baseline_sample_days;
     const baselineLabel =
-      n > 0
-        ? `Typical ${occ.weekday_label} (avg of ${n} prior days)`
+      occ.baseline_sample_days > 0
+        ? `Typical ${occ.weekday_label} (avg of ${occ.baseline_sample_days} prior days)`
         : `Typical ${occ.weekday_label} (no baseline yet)`;
+
     return {
       labels: occupancyAxisLabels,
       datasets: [
@@ -253,6 +282,7 @@ export function DashboardCharts({
 
   const occupancyHourlyCompare = useMemo(() => {
     if (!stats) return null;
+
     const occ = stats.occupancy;
     return {
       labels: occupancyAxisLabels,
@@ -287,86 +317,101 @@ export function DashboardCharts({
 
   return (
     <section className="charts" aria-label="Charts">
-      <article className="card card--chart">
-        <h2 className="card__heading">Net inside vs typical day</h2>
-        <p className="card__sub">
-          Cumulative net people inside since midnight {occ.timezone_note}: each step
-          adds (net entries − net exits) for that hour. The dashed line is the average
-          curve for past {occ.weekday_label}s (up to 12 days in the last 56). Starts
-          from zero at midnight — use for pacing, not absolute capacity.
-        </p>
-        <div className="chart-wrap">
-          {occupancyCumulative && (
-            <Line data={occupancyCumulative} options={lineOptionsOccupancy} />
-          )}
-        </div>
-      </article>
-      <article className="card card--chart">
-        <h2 className="card__heading">Hourly net flow vs baseline</h2>
-        <p className="card__sub">
-          Per-hour net change (in − out) for today so far vs the average for this
-          weekday at the same hour. Helps spot &quot;busier than usual&quot; slots for
-          breaks and staffing.
-        </p>
-        <div className="chart-wrap">
-          {occupancyHourlyCompare && (
-            <Bar data={occupancyHourlyCompare} options={barOptionsNet} />
-          )}
-        </div>
-      </article>
-      <article className="card card--chart">
-        <div className="card__heading-row">
-          <h2 className="card__heading card__heading--inline">
-            Hourly (last 24 h, UTC buckets)
-          </h2>
-          <button
-            type="button"
-            className="toggle-btn toggle-btn--small"
-            onClick={() => onHourly24hChange(!hourly24h)}
-            aria-pressed={hourly24h}
+      {page === "overview" && (
+        <>
+          <ChartCard
+            title="Net inside vs typical day"
+            subtitle={`Cumulative net people inside since midnight ${occ.timezone_note}. Use for pacing, not absolute capacity.`}
           >
-            {hourly24h ? "12-hour clock" : "24-hour (military)"}
-          </button>
-        </div>
-        <p className="card__sub">
-          Axis uses {hourly24h ? "24-hour" : "12-hour"} labels (UTC). Toggle anytime.
-        </p>
-        <div className="chart-wrap">
-          {hourly && <Line data={hourly} options={lineOptions} />}
-        </div>
-      </article>
-      <article className="card card--chart">
-        <h2 className="card__heading">Daily (last 14 days, UTC)</h2>
-        <div className="chart-wrap">
-          {daily && <Line data={daily} options={lineOptions} />}
-        </div>
-      </article>
-      <article className="card card--chart">
-        <h2 className="card__heading">Weekly (last 8 weeks, Mon UTC)</h2>
-        <p className="card__sub">
-          Each bar is labeled with the week&apos;s date span and ISO week number (W).
-        </p>
-        <div className="chart-wrap">
-          {weekly && <Bar data={weekly} options={barOptions} />}
-        </div>
-      </article>
-      <article className="card card--chart">
-        <h2 className="card__heading">Most active hours of day</h2>
-        <p className="card__sub">
-          Net crossings by clock hour (UTC), last 60 days — higher bars mean busier
-          hours.
-        </p>
-        <div className="chart-wrap">
-          {popularTotal && <Bar data={popularTotal} options={barOptions} />}
-        </div>
-      </article>
-      <article className="card card--chart">
-        <h2 className="card__heading">Peak direction by hour</h2>
-        <p className="card__sub">Same window: in vs out per hour of day (UTC), stacked.</p>
-        <div className="chart-wrap">
-          {popularSplit && <Bar data={popularSplit} options={barStackedOptions} />}
-        </div>
-      </article>
+            {occupancyCumulative && (
+              <Line data={occupancyCumulative} options={lineOptionsOccupancy} />
+            )}
+          </ChartCard>
+
+          <ChartCard
+            title="Hourly net flow vs baseline"
+            subtitle='Per-hour net change for today so far vs the average for this weekday.'
+          >
+            {occupancyHourlyCompare && (
+              <Bar data={occupancyHourlyCompare} options={barOptionsNet} />
+            )}
+          </ChartCard>
+        </>
+      )}
+
+      {page === "occupancy" && (
+        <>
+          <ChartCard
+            title="Net inside vs typical day"
+            subtitle={`Cumulative net people inside since midnight ${occ.timezone_note}: each step adds (net entries − net exits) for that hour. The dashed line is the average curve for past ${occ.weekday_label}s. Starts from zero at midnight.`}
+          >
+            {occupancyCumulative && (
+              <Line data={occupancyCumulative} options={lineOptionsOccupancy} />
+            )}
+          </ChartCard>
+
+          <ChartCard
+            title="Hourly net flow vs baseline"
+            subtitle='Per-hour net change (in − out) for today so far vs the average for this weekday at the same hour.'
+          >
+            {occupancyHourlyCompare && (
+              <Bar data={occupancyHourlyCompare} options={barOptionsNet} />
+            )}
+          </ChartCard>
+        </>
+      )}
+
+      {page === "trends" && (
+        <>
+          <ChartCard
+            title="Hourly (last 24 h, UTC buckets)"
+            subtitle={`Axis uses ${hourly24h ? "24-hour" : "12-hour"} labels (UTC).`}
+            action={
+              <button
+                type="button"
+                className="toggle-btn toggle-btn--small"
+                onClick={() => onHourly24hChange(!hourly24h)}
+                aria-pressed={hourly24h}
+              >
+                {hourly24h ? "12-hour clock" : "24-hour (military)"}
+              </button>
+            }
+          >
+            {hourly && <Line data={hourly} options={lineOptions} />}
+          </ChartCard>
+
+          <ChartCard title="Daily (last 14 days, UTC)">
+            {daily && <Line data={daily} options={lineOptions} />}
+          </ChartCard>
+
+          <ChartCard
+            title="Weekly (last 8 weeks, Mon UTC)"
+            subtitle="Each bar is labeled with the week's date span and ISO week number."
+          >
+            {weekly && <Bar data={weekly} options={barOptions} />}
+          </ChartCard>
+        </>
+      )}
+
+      {page === "patterns" && (
+        <>
+          <ChartCard
+            title="Most active hours of day"
+            subtitle="Net crossings by clock hour (UTC), last 60 days."
+          >
+            {popularTotal && <Bar data={popularTotal} options={barOptions} />}
+          </ChartCard>
+
+          <ChartCard
+            title="Peak direction by hour"
+            subtitle="Same window: in vs out per hour of day (UTC), stacked."
+          >
+            {popularSplit && (
+              <Bar data={popularSplit} options={barStackedOptions} />
+            )}
+          </ChartCard>
+        </>
+      )}
     </section>
   );
 }

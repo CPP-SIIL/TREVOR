@@ -3,20 +3,31 @@ import type { Stats } from "../types";
 type Props = { stats: Stats | null };
 
 export function Metrics({ stats }: Props) {
-  const tin = stats?.totals.in ?? null;
-  const tout = stats?.totals.out ?? null;
-  const net = tin !== null && tout !== null ? tin - tout : null;
+  // Use most recent day from daily arrays (today)
+  const todayIn =
+  stats?.daily.in[stats.daily.in.length - 1] ?? null;
+
+  const todayOut =
+  stats?.daily.out[stats.daily.out.length - 1] ?? null;
+  const net =
+    todayIn !== null && todayOut !== null ? todayIn - todayOut : null;
 
   return (
-    <section className="metrics" aria-label="Totals">
+    <section className="metrics" aria-label="Today's totals">
       <article className="card">
-        <h2 className="card__label">Overall in</h2>
-        <p className="card__value card__value--in">{tin === null ? "—" : tin}</p>
+        <h2 className="card__label">Today in</h2>
+        <p className="card__value card__value--in">
+          {todayIn === null ? "—" : todayIn}
+        </p>
       </article>
+
       <article className="card">
-        <h2 className="card__label">Overall out</h2>
-        <p className="card__value card__value--out">{tout === null ? "—" : tout}</p>
+        <h2 className="card__label">Today out</h2>
+        <p className="card__value card__value--out">
+          {todayOut === null ? "—" : todayOut}
+        </p>
       </article>
+
       <article className="card">
         <h2 className="card__label">Net inside</h2>
         <p
@@ -26,15 +37,17 @@ export function Metrics({ stats }: Props) {
               net === null
                 ? "var(--text)"
                 : net > 0
-                  ? "var(--accent-in)"
-                  : net < 0
-                    ? "var(--accent-out)"
-                    : "var(--text)",
+                ? "var(--accent-in)"
+                : net < 0
+                ? "var(--accent-out)"
+                : "var(--text)",
           }}
         >
           {net === null ? "—" : net}
         </p>
-        <p className="card__hint">In minus out (from recorded events)</p>
+        <p className="card__hint">
+          Today's net change (in − out)
+        </p>
       </article>
     </section>
   );

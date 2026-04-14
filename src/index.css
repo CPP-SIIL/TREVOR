@@ -276,3 +276,273 @@ body {
 .chart-wrap canvas {
   max-height: 100%;
 }
+
+:root {
+  --bg: #eef2f7;
+  --panel: #ffffff;
+  --panel-soft: #f7f9fc;
+  --border: #d9e2ef;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --accent: #3867f5;
+  --accent-soft: #e8efff;
+  --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+body.dark,
+[data-theme="dark"] {
+  --bg: #151b26;
+  --panel: #1e2635;
+  --panel-soft: #232d3f;
+  --border: #314056;
+  --text: #f3f4f6;
+  --muted: #a7b1c2;
+  --accent: #5b8cff;
+  --accent-soft: rgba(91, 140, 255, 0.14);
+  --shadow: 0 14px 36px rgba(0, 0, 0, 0.28);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+  font-family: "DM Sans", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+body {
+  min-height: 100vh;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.dashboard-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  background: var(--bg);
+}
+
+.dashboard-sidebar {
+  background: linear-gradient(180deg, #1b2332 0%, #141c28 100%);
+  color: #eef4ff;
+  padding: 28px 18px;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.dashboard-sidebar__brand {
+  margin-bottom: 28px;
+}
+
+.dashboard-sidebar__eyebrow {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #9fb3d9;
+  margin-bottom: 10px;
+}
+
+.dashboard-sidebar__title {
+  margin: 0;
+  font-size: 30px;
+  line-height: 1.1;
+  font-weight: 700;
+}
+
+.dashboard-sidebar__subtitle {
+  margin: 10px 0 0;
+  color: #b5c4df;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.dashboard-sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dashboard-sidebar__link {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: #d7e2f7;
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.dashboard-sidebar__link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.dashboard-sidebar__link--active {
+  background: var(--accent);
+  color: #ffffff;
+  box-shadow: 0 8px 20px rgba(56, 103, 245, 0.28);
+}
+
+.dashboard-main {
+  padding: 28px;
+  min-width: 0;
+}
+
+.dashboard-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.dashboard-topbar__title {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--text);
+}
+
+.dashboard-topbar__subtitle {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.dashboard-topbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.dashboard-section {
+  margin-bottom: 18px;
+}
+
+.status {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.status--error {
+  color: #d64545;
+  font-weight: 600;
+}
+
+.charts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+}
+
+.card--chart {
+  padding: 22px;
+  min-width: 0;
+}
+
+.card__heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.card__heading {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.card__heading--inline {
+  font-size: 24px;
+}
+
+.card__sub {
+  margin: 0 0 16px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.chart-wrap {
+  height: 340px;
+  min-width: 0;
+}
+
+.toggle-btn {
+  border: 1px solid var(--border);
+  background: var(--panel-soft);
+  color: var(--text);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.toggle-btn--small {
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.metric-card,
+.metrics .card {
+  min-width: 0;
+}
+
+@media (max-width: 1100px) {
+  .charts,
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .dashboard-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-sidebar {
+    border-right: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .dashboard-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .dashboard-topbar__actions {
+    width: 100%;
+  }
+}
