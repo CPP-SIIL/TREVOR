@@ -48,8 +48,7 @@ def main():
     model = checkpoint['model'].float()
     model.eval()
 
-    # Take an input from a camera
-    # Change camera index to use a different camera
+    # take in input from mac camera
     reader = cv2.VideoCapture(0)
 
     if not reader.isOpened():
