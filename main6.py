@@ -7,6 +7,8 @@ from counter import Counter
 from nets import nn
 from utils import util
 
+from picamera2 import Picamera2
+
 warnings.filterwarnings("ignore")
 
 
@@ -49,20 +51,23 @@ def main():
     model.eval()
 
     # take in input from mac camera
-    reader = cv2.VideoCapture(0)
+    # reader = cv2.VideoCapture(0)
 
-    if not reader.isOpened():
-        print("Error opening video stream or file")
+    picam2 = Picamera2()
 
-   # fps = int(reader.get(cv2.CAP_PROP_FPS))
-    fps = 60
+    config = picam2.create_video_configuration(
+        main={"format": "RGB888", "size": (640, 480)}
+    )
+
+    picam2.configure(config)
+    picam2.start()
+    
+    
+    fps = 30
     bytetrack = nn.BYTETracker(fps)
 
     # read initial frame to get dimensions
-    success, frame = reader.read()
-    if not success:
-        print("Could not read initial frame from camera")
-        return
+    frame = picam2.capture_array()
 
     height, width = frame.shape[:2]
 
@@ -71,16 +76,14 @@ def main():
 
     counter = Counter(A, B)
     
-    while reader.isOpened():
-        success, frame = reader.read()
-        if not success:
-            break
+    while True:
+        frame = picam2.capture_array()
 
         boxes = []
         confidences = []
         object_classes = []
 
-        image = frame.copy()
+        image = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
         shape = image.shape[:2]
 
         r = size / max(shape[0], shape[1])
@@ -124,27 +127,26 @@ def main():
                 confidences.append(detection[4])
                 object_classes.append(detection[5])
 
-       # outputs = bytetrack.update(np.array(boxes),
-        #                           np.array(confidences),
-         #                          np.array(object_classes))
-        
         if len(boxes) == 0:
             boxes_np = np.empty((0,4), dtype=np.float32)
             conf_np = np.empty((0,), dtype=np.float32)
             cls_np = np.empty((0,), dtype=np.float32)
-
         else:
             boxes_np = np.array(boxes, dtype=np.float32)
             conf_np = np.array(confidences, dtype=np.float32)
             cls_np = np.array(object_classes, dtype=np.float32)
-
         outputs = bytetrack.update(boxes_np, conf_np, cls_np)
+
+        #outputs = bytetrack.update(np.array(boxes),
+         #                          np.array(confidences),
+          #                         np.array(object_classes))
+        
         counter.update(outputs)
 
         if len(outputs) > 0:
             boxes = outputs[:, :4]
-            identities = outputs[:, 4]
-            object_classes = outputs[:, 6]
+            identities = outputs[:, 4].astype(int)
+            object_classes = outputs[:, 6].astype(int)
 
             for i, box in enumerate(boxes):
                 if object_classes[i] != 0:
